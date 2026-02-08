@@ -1,436 +1,286 @@
-# NLP-for-Machine-learning
-Text preprocessing >>> what we have learn ? 
+# NLP for Machine Learning
 
-sentiment Analysis : 
+This repository provides a structured and practical overview of **Natural Language Processing (NLP) concepts for Machine Learning**, with a strong focus on **text preprocessing**, **feature representation**, and **word embeddings**. The content is designed as learning notes and explanations that can be used as a reference or study guide.
 
-            
-Dataset >>> text preprocessing >>>>>>>> Text preprocessing part 2 >>>>
-            * Tokenization              *Stemming
-            * Lower case the words      * Lemmatization
-            * Regular Expertion         * Stopwords
+---
 
+## Overview
 
+In NLP-based machine learning tasks (such as sentiment analysis), raw text must go through several processing steps before it can be used by machine learning algorithms. This repository explains:
 
->>>>>> (text ---> vectors)>>>>>>>>> ML Algorithms  
-       * one hot encoded 
-       * Bag of words (BOW)
-       * Tf-IDF
-       * word2vec
-       * Avg word2vec
+1. Text preprocessing techniques
+2. Converting text into numerical vectors
+3. Classical feature extraction methods
+4. Word embeddings and Word2Vec
 
+---
 
----------------------------------------------------------------------------------
+## Text Preprocessing
 
-(text ---> vectors) 
+Text preprocessing is the foundation of any NLP pipeline. It prepares raw text for feature extraction and modeling.
 
-1) one hot Encoded 
+### Common Preprocessing Steps
 
-D1> the food is good 
-D2> the food is bad
-D3> pizza is Amazing
+* Tokenization
+* Converting text to lowercase
+* Removing punctuation and special characters using regular expressions
+* Removing stopwords
+* Stemming
+* Lemmatization
 
-                       
-* Vocabulary {unique words} >>>>>
+These steps help normalize text and reduce noise before vectorization.
 
-the food is good bad pizza Amazing
+---
 
-for D1> 
+## NLP Pipeline (High Level)
 
-1    0    0  0    0   0     0  =  
-0    1    0  0    0   0     0  = 
-0    0    1  0    0   0     0 
-0    0    0  1    0   0     0  
+```text
+Raw Text
+   ↓
+Text Preprocessing
+   ↓
+Text to Vector Conversion
+   ↓
+Machine Learning Algorithms
+```
 
+---
 
-for D2 > 
+## Text to Vector Representations
 
-1    0    0  0    0   0     0 
-0    1    0  0    0   0     0 
-0    0    1  0    0   0     0 
-0    0    0  0    1   0     0 
+Machine learning models require fixed-size numerical input. Therefore, text must be converted into vectors.
 
-------------------------------------------------------------
+### 1. One-Hot Encoding
 
+Each word in the vocabulary is represented as a binary vector.
 
-the Advantages and disAdvatages of (one hot encoded) :
+**Example Documents**:
 
-* Advantages >>>  
-1. Easy to implement with python 
-   ( sklearn > one hotencoder , pd.get_dummies() ) 
+* D1: the food is good
+* D2: the food is bad
+* D3: pizza is amazing
 
+**Vocabulary**:
 
+```text
+the, food, is, good, bad, pizza, amazing
+```
 
+Each word is represented by a vector where only one position is set to 1 and the rest are 0.
 
-* Disadvanages :
+#### Advantages
 
-sparse matrics >> overfitting 
+* Easy to understand and implement
+* Supported directly in libraries such as scikit-learn and pandas
 
-ml Algorithm >>>>> we need fixed size I/p 
+#### Disadvantages
 
-no semantic meaning is basically getting 
+* Produces sparse matrices
+* Leads to high dimensionality and potential overfitting
+* No semantic meaning between words
+* Out-of-vocabulary (OOV) problem
 
-out of vocabulary
+---
 
+### 2. Bag of Words (BoW)
 
+Bag of Words represents text by counting word frequencies, ignoring word order.
 
+**Example Sentences**:
 
--------------------------------------------------------------------------
+* S1: He is a good boy
+* S2: She is a good girl
+* S3: Boy and girl are good
 
+After preprocessing, the vocabulary might be:
 
-Bag of words (BOW) >>>             low case all the world 
+```text
+good, boy, girl
+```
 
-text                           o/p  
-He is a good boy                1      >>>> s1 >> good boy 
-she is a good girl              1      >>>> s2 >> good girl
-Boy and girl are good           1      >>>> s3 >> boy girl good 
+Each sentence is represented by a frequency vector based on this vocabulary.
 
+#### Binary BoW vs Frequency BoW
 
+* Binary BoW: Uses 0 or 1 to indicate word presence
+* Frequency BoW: Counts how many times a word appears
 
-  vocabulary          frequency 
-   good                 3 
-  
-   boy                  2
+#### Advantages
 
-   girl                 2        
+* Simple and intuitive
+* Fixed-size input suitable for ML algorithms
 
-     good boy girl
-s1   [1  1   0] 
+#### Disadvantages
 
-s2  [1   0   1] 
+* Sparse representation
+* Ignores word order
+* No semantic meaning
+* Out-of-vocabulary issue
 
-s3  [1   1   1] 
+---
 
+### 3. N-Grams
 
+N-grams capture local word order by considering sequences of words.
 
-Binary Bow  and Bow  >>>>>>>>
-{1 , 0 }        { count will get update back on frequency } 
+Examples:
 
+* Unigrams: single words
+* Bigrams: pairs of words
+* Trigrams: sequences of three words
 
+In scikit-learn:
 
+```text
+ngram_range=(1,1)  -> Unigrams
+ngram_range=(1,2)  -> Unigrams + Bigrams
+ngram_range=(1,3)  -> Unigrams + Bigrams + Trigrams
+ngram_range=(2,3)  -> Bigrams + Trigrams
+```
 
-_________________________________________________________________________
+N-grams partially capture context but still suffer from sparsity.
 
-BoW ......
+---
 
-Advantage :                           DisAdvantage 
+### 4. TF-IDF (Term Frequency – Inverse Document Frequency)
 
-1) simple and Intuitive                * sparce matrix or array >>> overfiting  
-                                       * ordering of the world is getting change 
-2) fixed sized I/p >> ml Algorithm     * out of vocabulary (oov) 
-                                       * sementic meaning is still not captured
+TF-IDF improves upon BoW by weighting words based on their importance.
 
-----------------------------------------------------------------------------------------------
+* Term Frequency (TF):
 
+```text
+TF = (Number of times word appears in a document) / (Total words in document)
+```
 
+* Inverse Document Frequency (IDF):
 
-*** (N-grams)     eg : b
+```text
+IDF = log(Number of documents / Number of documents containing the word)
+```
 
+* Final TF-IDF score:
 
-s1: the food is good                                 vocabulary : food not good 
-                                                                   1    0    1
-s2: the food is not good                                           1     1   1 
+```text
+TF-IDF = TF × IDF
+```
 
+#### Advantages
 
-   [ food  not  good     foodgood     foodnot       notgood ]
+* Reduces importance of common words
+* Captures word importance
+* Fixed-size representation
 
-s1    1     0     1         1           0             0      
+#### Disadvantages
 
-s2    1      1    1         0           1              1    
+* Still sparse
+* No deep semantic understanding
+* Out-of-vocabulary problem remains
 
+---
 
+## Word Embeddings
 
-sklearn >>>>> n-grams = (1, 1 ) >>>> unigrams 
-                      = (1 , 2) >>>> unigrams , bigrams 
-                      = (1 , 3) >>>> unigrams , bigrams , trigrams 
-                      = (2 , 3) >>>> bigrams , trigrams 
+Word embeddings represent words as dense, real-valued vectors that capture semantic meaning. Words with similar meanings are closer in vector space.
 
+### Types of Embeddings
 
+1. Count-based methods
 
---------------------------------------------------------------------------------------------
+   * One-Hot Encoding
+   * Bag of Words
+   * TF-IDF
 
-### TF-IDF >>> [Term frequency and inverse document frequency ]
+2. Predictive (Deep Learning-based) methods
 
+   * Word2Vec
 
-as we work in bag of words >>> u can go and see ...
+     * CBOW (Continuous Bag of Words)
+     * Skip-gram
 
-s1 >> good boy 
-s2 >> good girl 
-s3 >> boy girl good 
+---
 
+## Word2Vec
 
+Word2Vec is a neural network-based technique introduced in 2013 to learn word representations from large text corpora.
 
-------------------------------------------------
+Each word is mapped to a fixed-size dense vector (commonly 100–300 dimensions).
 
-term frequency >> no of rep of words in sentence / no of words in sentence
+### Semantic Relationships
 
-IDF = loge(no of sentences / no og sentences containing the word 
+Word embeddings preserve semantic relationships. For example:
 
+```text
+vector("king") - vector("man") + vector("woman") ≈ vector("queen")
+```
 
+---
 
-term requency 
-        s1       s2       s3 
+## Cosine Similarity
 
-good   1/2       1/2     1/3
+Cosine similarity measures the similarity between two word vectors by computing the cosine of the angle between them.
 
-boy    1/2      0       1/3
+```text
+Cosine Similarity = (A · B) / (||A|| × ||B||)
+Distance = 1 − Cosine Similarity
+```
 
-girl   0         1/2    1/3
+It is commonly used with Word2Vec embeddings to compare word meanings.
 
+---
 
-*IDF 
+## Word2Vec Architectures
 
-words        IDF
-good          log(3/3)=0
+### 1. CBOW (Continuous Bag of Words)
 
-boy           log(3/2) 
+* Predicts the target word given its surrounding context words
+* Faster training
+* Performs well on smaller datasets
 
-girl          log(3/2) 
+### 2. Skip-gram
 
+* Predicts surrounding context words given a target word
+* Performs better on large datasets
+* Captures rare words more effectively
 
-------------------------------------------------------------------------------
+### When to Use
 
+* Small datasets: CBOW
+* Large datasets: Skip-gram
 
-final TF-IDF    = term frequency * IDF
+---
 
+## Improving Word2Vec Models
 
-    good         boy                   girl 
+* Increase training data size
+* Increase context window size
+* Train on domain-specific corpora
 
-s1   0            1/2*log(3/2)          0
+Google’s Word2Vec model was trained on billions of words and produces 300-dimensional embeddings.
 
+---
 
-s2  0              0                    1/2*log(3/2)
+## Advantages of Word2Vec
 
+* Dense vector representations (not sparse)
+* Captures semantic relationships
+* Fixed-size embeddings regardless of vocabulary size
+* Handles out-of-vocabulary words better through pretrained models
 
-s3  0              1/3log(3/2)          1/3 log(3/2) 
+---
 
+## Conclusion
 
+This repository provides a clear progression from basic text preprocessing to advanced word embeddings. It serves as a strong foundation for tasks such as sentiment analysis, text classification, and other NLP-based machine learning applications.
 
+---
 
-------------------------------------------------------------------------
+## Author
 
+Hesham El Desoky
+Machine Learning Engineer
 
-TF-IDF 
+---
 
+## License
 
-Advantages                        DisAdvantage 
-
-
-1. Intuitive                       1. Sparsity is still exist .
-
-2. Fixed Size >>> vocab size       2. oov (out of vocabulary) 
-
-3. word importance is getting 
-captured 
-
-
-----------------------------------------------------------------
-
-### Word Embeddengs 
-
-in natural language processing (NLP), word embedding is a term used for the representation of words for text 
-analysis , typically in the form of a rea_valued vector that encoded the meaning of the word such that the words that are 
-closer in the vector space are expected to be similar in meaning . 
-
-
-
-
-Word Embeddings >>>
-
-1. count or frequency   >>> 1. OHE           2. BOW             3.Tf_IDF
-
-
-2. Deep learning trained model >>> 1. word2vec >> a.CBOW(countinous Bag of words)   
-                                                  b.skipgram  
-
-
---------------------------------------------------------------------------------------
-
-# Word2vec: >>>> feature Represntation .
-
-word2vec is a technique for natural language processing published in 2013. The word2vec algorithm uses a neural network model 
-to learn word associations from a large corpus of text.once trained , such a model can detect 
-synonymous words or suggest additional words for a partial sentence. As the name implies, word2vec represents each 
-distinct word with a particular list of numbers called a vector . 
-
-
----------------------------------------------------------------------------
-
-vocabulary >> unique words >>> corpus 
-
-
-         Boy   Girl   King   Queen Apple  Mango 
-
-
-Gender   -1    1      0.94    -0.93  0.004 0.005
-
-Royel 
-
-Age 
-
-food 
-.
-.
-.
-..
-.
-300 dimensions feature
-for every word 
---------------------------------------------------
-
-Relationships between words are preserved.
-Example:
-vec("king") - vec("man") + vec("woman") ≈ vec("queen")
-
-
-
-( Cosine Similarity ) >>> 
-
-let say the angle between 2 vector is 45 
-
-
-Distance = 1- cosine similarity 
-
-Cosine sim = cos(45)  
-
-so the distance = 1- 0.7071 = 0.3
-
-
-*Cosine similarity:
-
-is commonly used with Word2Vec to measure how similar two words are based on their vector representations.
-
-Why Cosine Similarity?
-Word2Vec turns each word into a vector of real numbers in a high-dimensional space (like 100 or 300 dimensions).
-To find how similar two words are, we don’t just subtract them — instead, we look at the angle between their vectors.
-
-That’s where cosine similarity comes in.
-
-
-
-------------------------------------------------------------------------------------------------------------------
-
-
-
-### Word2vec CBOW   
-
-
-as we know >> 
-
-
-
-Ann , loss , optimizers 
-
-* Word2vec >>> *cbow                    (pretrained Model) (train A model from scratch ) 
-               *skipgramm
-
-
-----------------------------------
-
-at first we will start with (CBOW) >>>[continous Bag of words]
-
-What is Word2Vec (CBOW)?
-Goal: Learn to represent each word as a vector (embedding) such that similar words have similar vectors.
-
-CBOW predicts the target word given its context words.
-
-
-
-CBOW Architecture (Intuition)
-Example sentence:
-
-plaintext
-Copy
-Edit
-"The cat sits on the mat"
-Let’s say our context window = 2
-
-For the word "sits", the context is:
-
-plaintext
-Copy
-Edit
-["the", "cat", "on", "the"]
-So training data =
-X (input) = ["the", "cat", "on", "the"]
-y (output) = "sits"
-
-🧠 The model learns that if we see “the”, “cat”, “on”, “the” around — then “sits” is likely the center word.
-
-🧠 CBOW Architecture (Layers):
-Input layer: One-hot encoded context words
-
-Hidden layer: Shared embedding layer (size = 100, for example)
-
-Output layer: Softmax over vocabulary to predict target word
-
-🔢 Example with Vocabulary
-Let’s assume a small vocab of 5 words:
-["king", "queen", "man", "woman", "child"]
-
-Step 1: Context = ["king", "man"], Target = "queen"
-Step 2: One-hot encode context:
-ini
-Copy
-Edit
-king  = [1, 0, 0, 0, 0]  
-man   = [0, 0, 1, 0, 0]
-Step 3: Average the context vectors:
-Copy
-Edit
-([1, 0, 0, 0, 0] + [0, 0, 1, 0, 0]) / 2 = [0.5, 0, 0.5, 0, 0]
-Step 4: Pass through embedding layer → get vector
-(this is the learned weight matrix, W)
-
-Step 5: Output is softmax over vocab:
-Model tries to predict: "queen"
-
-
---------------------------------------------------------------------------------------------
-
-2) >>>> Skipgram  ---word2vec >>>> 
-
-when should we apply CBOW or skipgram ...
-
-small dataset >>>>> CBOW 
-
-huge dataset >>>> skipgram
-
-
-# if you want to increase or improve SBOW or skipgram , how can you basically do it ? 
-
-1) increasing the training dataset 
-
-2) increase the windows size which  in leads to increase of vector dimension
-
-______________________________________________________________________________________________
-
-Google word2vec >>>>
-
-3 billion words >>>
-
-feature represintation of 300 dimensions vectors 
-
-
-cricket >>> is alwayes there in the news 
-
-
---------------------------------------------------------------------------------------------------
-
-# Advantages of Word2vec:
-
-a) Sparce Matrix >>>>>> Dence Matrix 
-*A dense matrix is a matrix where most values are non-zero.
-
-b) Sementic Info is getting captured ...
-[HOnset , good]   
-
-c) past > vocabelary size >>> now >> fixed set of dimesions 
-
-google word2vec [300 dimensions] 
-
-
-
-d) oov >> oov is also solved 
-
-
----------------------------------------------------------------------------====================
+This project is licensed under the MIT License.
